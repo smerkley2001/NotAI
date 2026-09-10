@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/generate-preview.js": {
-      "maxDuration": 60
-    }
-  }
-}

@@ -53,9 +53,12 @@ export default async function handler(req, res) {
     form.append("size", "1024x1536");
 
     // First image = model/shirt reference. Second image = exact artwork reference.
-    form.append("image", dataUrlToBlob(baseImageDataUrl), "model-reference.png");
-    form.append("image", dataUrlToBlob(artworkDataUrl), "exact-artwork.png");
+   // form.append("image", dataUrlToBlob(baseImageDataUrl), "model-reference.png");
+  //  form.append("image", dataUrlToBlob(artworkDataUrl), "exact-artwork.png");
 
+form.append("image[]", dataUrlToBlob(baseImageDataUrl), "model-reference.png");
+form.append("image[]", dataUrlToBlob(artworkDataUrl), "exact-artwork.png");
+    
     form.append(
       "prompt",
       `Create a photorealistic ecommerce lifestyle preview using image 1 as the person/garment reference and image 2 as the exact shirt artwork.

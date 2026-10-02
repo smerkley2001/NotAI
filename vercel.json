@@ -1,0 +1,1 @@
+{"buildCommand":"npm run build","outputDirectory":"dist","headers":[{"source":"/account.html","headers":[{"key":"Cache-Control","value":"no-store"}]},{"source":"/reset-password.html","headers":[{"key":"Cache-Control","value":"no-store"},{"key":"Referrer-Policy","value":"no-referrer"}]}]}

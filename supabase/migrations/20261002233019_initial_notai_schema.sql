@@ -136,18 +136,23 @@ create table public.order_events (
  created_at timestamptz not null default now()
 );
 -- Prevent service-side creation of orders for detached/deleted or anonymous accounts.
-create function public.notai_require_registered_buyer() returns trigger
-language plpgsql security invoker set search_path = '' as $$
+create schema if not exists notai_private;
+revoke all on schema notai_private from public, anon, authenticated;
+create function notai_private.require_registered_buyer() returns trigger
+language plpgsql security definer set search_path = '' as $$
 begin
+ if (select auth.uid()) is not null and not exists (
+  select 1 from public.profiles where id=new.user_id and auth_user_id=(select auth.uid())
+ ) then raise exception 'Buyer does not match authenticated user'; end if;
  if not exists(select 1 from public.profiles p join auth.users u on u.id=p.auth_user_id
                where p.id=new.user_id and u.is_anonymous is false and p.archived_at is null) then
   raise exception 'Order requires a registered account';
  end if;
  return new;
 end $$;
-revoke all on function public.notai_require_registered_buyer() from public, anon, authenticated;
+revoke all on function notai_private.require_registered_buyer() from public, anon, authenticated;
 create trigger orders_registered_buyer before insert on public.orders
-for each row execute function public.notai_require_registered_buyer();
+for each row execute function notai_private.require_registered_buyer();
 -- Append-only revisions and financial history. Back-office corrections use new rows.
 create function public.notai_immutable_record() returns trigger
 language plpgsql security invoker set search_path = '' as $$

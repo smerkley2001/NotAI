@@ -1,0 +1,24 @@
+{
+  "name": "notai",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/account-browser.mjs",
+    "test:customer": "node tests/customer-browser.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "fflate": "0.8.2",
+    "qrcode": "1.5.4",
+    "stripe": "22.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "jsqr": "1.4.0",
+    "playwright": "1.62.1",
+    "pngjs": "7.0.0"
+  }
+}

@@ -32,7 +32,7 @@ input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:8px;
 .stage{min-height:570px;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at 50% 25%,#fff 0,#f5f7fa 45%,#e8edf3 100%);border-radius:12px;overflow:hidden}
 .tee{position:relative;width:min(100%,430px);aspect-ratio:384/479;filter:drop-shadow(0 18px 20px #0002)}
 .tee img{display:block;width:100%;height:100%;object-fit:cover;border-radius:10px}
-.art{position:absolute;left:50%;top:48.5%;transform:translate(-50%,-50%);width:44%;text-align:center;color:white;text-shadow:0 1px 2px #0005}
+.art{visibility:hidden;position:absolute;left:50%;top:48.5%;transform:translate(-50%,-50%);width:44%;text-align:center;color:white;text-shadow:0 1px 2px #0005}
 .main{font-size:25px;line-height:1.02;font-weight:800;text-align:center;letter-spacing:-.5px}
 .accent{display:inline-block}
 .underline{height:3px;width:42px;margin:7px auto 11px}
@@ -66,23 +66,24 @@ input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:8px;
   .qr{width:88px;height:88px}
   .top{height:58px}
 }
-</style></head><body><div class='top'>Not AI, Just <i>I.</i></div><div class='wrap'><div class='hero'><h1>Make it yours.</h1><p>Customize your words, your <b>I.</b>, and the symbol that says something about you.</p></div><div class='grid'><div class='panel'>
-<label>Your first line</label><input id='l1' value='modest, but handsome' maxlength='32'>
-<label>Your second line</label><input id='l2' value='and a great soccer player' maxlength='32'>
-<label>Typeface</label><select id='font'><option value='Arial'>Modern</option><option value='Georgia'>Classic</option><option value='Courier New'>Tech Mono</option><option value='Trebuchet MS'>Friendly</option><option value='Verdana'>Clean</option></select>
+.icon svg{width:22px;height:22px}.panel #share-design,.panel #save-copy,.panel #restore-revision{border:1px solid #aab8c4;border-radius:8px;background:white;padding:10px;margin-top:10px}.panel #proof-link{display:block;margin:14px 0;font-weight:700}.panel #proof-link[hidden]{display:none}.panel details{margin:16px 0}.panel #word-suggestions button{display:block;padding:8px;margin:8px 0}
+</style></head><body><div class='top'>Not AI, Just <i>I.</i><a href='/account.html' style='margin-left:auto;color:white;font-size:14px;font-weight:500'>My account</a></div><div class='wrap'><div class='hero'><h1>Make it yours.</h1><p>Customize your words, your <b>I.</b>, and the symbol that says something about you.</p></div><div class='grid'><div class='panel'>
+<label for='starter'>Need a starting point?</label><select id='starter'><option value=''>Start with my own words</option><option value='soccer'>A talent I love</option><option value='family'>My people</option><option value='creative'>My creative side</option><option value='quiet'>Something unexpected</option></select><label for='l1'>Your first line</label><input id='l1' value='modest, but handsome' maxlength='32'>
+<label for='l2'>Your second line</label><input id='l2' value='and a great soccer player' maxlength='32'>
+<label for='font'>Typeface</label><select id='font'><option value='Arial'>Modern</option><option value='Georgia'>Classic</option><option value='Courier New'>Tech Mono</option><option value='Trebuchet MS'>Friendly</option><option value='Verdana'>Clean</option></select>
 <label>Color your I.</label><div class='colors' id='colors'></div>
 <label>Choose a symbol</label><div class='icons' id='icons'></div>
 <label>Shirt color</label><div class='shirts' id='shirts'></div>
-<label>Size</label><select><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option></select>
+<label for='shirt-size'>Size (confirm at checkout)</label><select id='shirt-size'><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option></select>
 <div class='ref'>✨ Every shirt gets a unique QR code. When someone scans yours and orders, <b>you earn $3 store credit.</b></div><div class='price'>$27.99</div><div class='intro'>Founding Human introductory price</div>
-<button class='buy' onclick="alert('Checkout is coming soon.')">Create My Shirt</button>
+<label for='design-name'>Design name</label><input id='design-name' value='My first design' maxlength='120'><button class='buy' id='save-design'>Save my design</button><button id='share-design'>Share saved design</button><input id='share-url' aria-label='Shared design link' readonly hidden><a id='proof-link' href='/designs.html' hidden>Review print proof and order →</a><p><a href='/shares.html'>My shares</a> · <a href='/gifts.html'>Gifts</a> · <a href='/sizes.html'>Size guide</a></p><details><summary>Optional AI wording help</summary><p>AI can suggest wording. You choose the final words.</p><label for='word-idea'>What would you like your shirt to say about you?</label><input id='word-idea' maxlength='300'><button id='suggest-words' type='button'>Suggest two-line ideas with AI</button><div id='word-suggestions'></div></details><button id='save-copy' hidden>Save as a new copy</button><div id='design-history' hidden><label for='revision-select'>Earlier versions</label><select id='revision-select'></select><button id='restore-revision'>Restore as a new version</button></div><p id='status' role='status' aria-live='polite'></p><p>Save, review your proof, then choose an available size to order. <a href='/designs.html'>My saved designs</a></p>
 <button class='aiButton' id='aiPreviewBtn'>✨ Generate Realistic Preview</button>
 <div class='aiHelp'>Creates one AI lifestyle preview from your exact design. The live shirt preview remains the accurate print reference.</div>
 </div>
 <div class='preview'><div class='tabs'><button id='frontBtn' class='active'>FRONT</button><button id='backBtn'>BACK</button></div><div class='stage'><div class='tee'>
 <img id='shirtPhoto' src='shirt-charcoal-front.png' alt='Customized charcoal T-shirt preview'>
 <div class='art' id='front'><div class='main'>Not AI,<br>Just <span class='accent'>I.</span></div><div class='underline'></div><div class='sub' id='p1'></div><div class='sub' id='p2'></div><div class='symbol' id='symbol'></div></div>
-<div class='back' id='back'><h2>LIKE THE SHIRT?</h2><div class='qr'></div><p>Make yours.</p><div style='font-size:10px;margin-top:6px'>notaijusti.com/s/7F3K</div><div class='credit'>Earn $3 when your shirt inspires an order.</div></div>
+<img id='canonical-art' alt='Your print artwork' style='position:absolute;left:50%;top:48.5%;transform:translate(-50%,-50%);width:44%;height:auto;object-fit:contain'><div class='back' id='back'><h2>LIKE THE SHIRT?</h2><div class='qr' style='background:white;display:flex;align-items:center;justify-content:center;color:#111;font-size:12px'>Your unique QR<br>is created with<br>your order</div><p>Make yours.</p><div style='font-size:10px;margin-top:6px'>notaijusti.com/s/your-shirt</div><div class='credit'>Earn $3 when your shirt inspires an order.</div></div>
 </div></div>
 <div class='aiResult' id='aiResult'>
   <div class='aiBadge'>AI lifestyle preview</div>
@@ -110,12 +111,14 @@ function render(){
   shirtPhoto.alt=`Customized ${shirt} T-shirt ${side} preview`;
   front.style.color=shirt==='white'?'#111':'#fff';
   back.style.color=shirt==='white'?'#111':'#fff';
+  document.getElementById('aiResult').style.display='none';
+  window.dispatchEvent(new Event('notai:design-changed'));
 }
 
 cs.forEach((c,i)=>{
   let b=document.createElement('button');
   b.className='swatch'+(i===0?' selected':'');
-  b.style.background=c;
+  b.style.background=c;b.setAttribute('aria-label','Accent '+c);
   b.onclick=()=>{
     accent=c;
     document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('selected'));
@@ -127,7 +130,7 @@ cs.forEach((c,i)=>{
 syms.forEach((s,i)=>{
   let b=document.createElement('button');
   b.className='icon'+(i===0?' selected':'');
-  b.textContent=s;
+  b.textContent=s;b.setAttribute('aria-label','Symbol '+s);
   b.onclick=()=>{
     symbol=s;
     document.querySelectorAll('.icon').forEach(x=>x.classList.remove('selected'));
@@ -139,7 +142,7 @@ syms.forEach((s,i)=>{
 sh.forEach((s,i)=>{
   let b=document.createElement('button');
   b.className='shirt'+(i===0?' selected':'');
-  b.textContent=s[0];
+  b.textContent=s[0];b.setAttribute('aria-label',s[0]+' shirt');
   b.onclick=()=>{
     shirt=s[1];
     document.querySelectorAll('.shirt').forEach(x=>x.classList.remove('selected'));
@@ -175,50 +178,7 @@ async function imageToDataURL(url){
   });
 }
 
-function makeArtworkDataURL(){
-  // A clean, exact artwork file. This is also the direction we will later use for production art.
-  const canvas=document.createElement('canvas');
-  canvas.width=1024; canvas.height=1024;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,1024,1024);
-
-  const dark = shirt==='white' ? '#111111' : '#ffffff';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-
-  let family=font.value || 'Arial';
-  ctx.font=`800 150px ${family}`;
-  ctx.fillStyle=dark;
-  ctx.fillText('Not AI,',512,240);
-
-  // "Just " and "I." are drawn separately so the I. can retain the chosen accent.
-  ctx.font=`800 150px ${family}`;
-  const just='Just ';
-  const iw=ctx.measureText('I.').width;
-  const jw=ctx.measureText(just).width;
-  const total=jw+iw;
-  const start=512-total/2;
-  ctx.textAlign='left';
-  ctx.fillStyle=dark;
-  ctx.fillText(just,start,390);
-  ctx.fillStyle=accent;
-  ctx.fillText('I.',start+jw,390);
-
-  ctx.fillStyle=accent;
-  ctx.fillRect(390,485,244,12);
-
-  ctx.textAlign='center';
-  ctx.fillStyle=dark;
-  ctx.font=`500 52px ${family}`;
-  ctx.fillText(l1.value || '',512,590);
-  ctx.fillText(l2.value || '',512,665);
-
-  ctx.fillStyle=accent;
-  ctx.font='92px Arial';
-  ctx.fillText(symbol,512,790);
-
-  return canvas.toDataURL('image/png');
-}
+async function makeArtworkDataURL(){return await window.notaiDesigner.artworkPng();}
 
 async function generateAIPreview(){
   const btn=document.getElementById('aiPreviewBtn');
@@ -237,7 +197,7 @@ async function generateAIPreview(){
     // Use the blank/model image matching the currently selected color.
     // Force a front-view base image because the realistic preview is currently front-only.
     const baseImageDataUrl=await imageToDataURL(`shirt-${shirt}-front.png`);
-    const artworkDataUrl=makeArtworkDataURL();
+    const artworkDataUrl=await makeArtworkDataURL();
 
     const response=await fetch('/api/generate-preview',{
       method:'POST',
@@ -270,5 +230,6 @@ async function generateAIPreview(){
 
 document.getElementById('aiPreviewBtn').addEventListener('click',generateAIPreview);
 render();
-</script>
+window.notaiDesigner={read:()=>({line1:l1.value,line2:l2.value,font:font.value,accent,symbol,shirt}),apply:d=>{l1.value=d.line1;l2.value=d.line2;font.value=d.font;accent=d.accent;symbol=d.symbol;shirt=d.shirt;document.querySelectorAll('.swatch').forEach((b,i)=>b.classList.toggle('selected',cs[i]===accent));document.querySelectorAll('.icon').forEach((b,i)=>b.classList.toggle('selected',syms[i]===symbol));document.querySelectorAll('.shirt').forEach((b,i)=>b.classList.toggle('selected',sh[i][1]===shirt));document.getElementById('aiResult').style.display='none';render();}};
+</script><script type='module' src='/assets/designer.js'></script>
 </body></html>

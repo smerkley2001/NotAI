@@ -9,3 +9,7 @@ await copyFile('assets/account.css','dist/assets/account.css');
 await copyFile('assets/navigation.css','dist/assets/navigation.css');
 
 await copyFile('assets/theme.css','dist/assets/theme.css');
+
+await mkdir('dist/assets/fonts',{recursive:true});
+await copyFile('assets/fonts/space-grotesk-bold.ttf','dist/assets/fonts/space-grotesk-bold.ttf');
+await copyFile('assets/fonts/OFL.txt','dist/assets/fonts/OFL.txt');

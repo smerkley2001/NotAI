@@ -109,7 +109,7 @@ async function initialize(){
   $('password-form').hidden=!recovery;
   if(!recovery)message('Open the password reset link from your email, or request a new one below.');
  }
- if(user&&['signin','signup'].includes(page))location.replace('/account.html');
+ if(user&&['signin','signup'].includes(page))location.replace(page==='signin'?safeNext(new URLSearchParams(location.search).get('next')):'/account.html');
  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
 }
 initialize().catch(error=>message(errorText(error),true));

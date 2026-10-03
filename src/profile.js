@@ -9,7 +9,8 @@ export function validateProfile({full_name,handle,network_visibility}) {
 }
 export function safeNext(value) {
  // Only explicitly allowed account pages can be a post-login destination.
- return ['/', '/index.html', '/account.html','/designs.html','/orders.html','/credits.html','/network.html'].includes(value) ? value : '/account.html';
+ if(typeof value==='string'&&/^\/gift\/[a-f0-9]{32}$/.test(value))return value;
+ return ['/', '/index.html', '/account.html','/designs.html','/orders.html','/credits.html','/network.html','/gifts.html','/shares.html'].includes(value) ? value : '/account.html';
 }
 export function validatePassword(password,confirmation) {
  if(password.length<12) throw new Error('Use at least 12 characters for your password.');

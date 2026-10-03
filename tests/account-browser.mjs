@@ -22,8 +22,9 @@ await context.route('https://dompwdardnqvmoncawrk.supabase.co/**',async route=>{
  else if(u.pathname.endsWith('/rpc/save_design')){design={...design,...r.postDataJSON().p_design,revision_number:++saveCalls};body={design_id:designId,revision_id:designId,revision_number:saveCalls};}
  else if(u.pathname.endsWith('/rpc/archive_design')){archived=r.postDataJSON().p_archived;body=null;}
  else if(u.pathname.endsWith('/rpc/list_my_designs'))body=r.postDataJSON().p_archived===archived?[{id:designId,name:'My first design',updated_at:design.created_at,revision:design}]:[];
- else if(u.pathname.endsWith('/design_revisions'))body=[design];
+ else if(u.pathname.endsWith('/design_revisions'))body=r.headers().accept?.includes('object')?design:[design];
  else if(u.pathname.endsWith('/designs'))body={id:designId,name:'My first design',archived_at:null};
+ else if(['/rpc/my_referrals','/rpc/my_network','/rpc/gift_submissions','/design_shares'].some(x=>u.pathname.endsWith(x)))body=[];
  else if(['/orders','/credit_ledger','/shirts'].some(x=>u.pathname.endsWith(x)))body=[];
  else if(u.pathname.includes('/rest/v1/profiles')){
   if(r.method()==='PATCH'){saved={...saved,...r.postDataJSON()};body={id:saved.id};}

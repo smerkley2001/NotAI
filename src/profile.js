@@ -8,8 +8,8 @@ export function validateProfile({full_name,handle,network_visibility}) {
  return {full_name:name,handle:username||null,network_visibility};
 }
 export function safeNext(value) {
- // Only the current customizer/account can be a post-login destination.
- return ['/', '/index.html', '/account.html'].includes(value) ? value : '/account.html';
+ // Only explicitly allowed account pages can be a post-login destination.
+ return ['/', '/index.html', '/account.html','/designs.html','/orders.html','/credits.html','/network.html'].includes(value) ? value : '/account.html';
 }
 export function validatePassword(password,confirmation) {
  if(password.length<12) throw new Error('Use at least 12 characters for your password.');

@@ -8,9 +8,10 @@ export function validateProfile({full_name,handle,network_visibility}) {
  return {full_name:name,handle:username||null,network_visibility};
 }
 export function safeNext(value) {
+ if(typeof value==='string'&&/^\/finance-entry\.html(?:\?order=[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})?$/.test(value))return value;
  // Only explicitly allowed account pages can be a post-login destination.
  if(typeof value==='string'&&/^\/gift\/[a-f0-9]{32}$/.test(value))return value;
- return ['/', '/index.html', '/account.html','/designs.html','/orders.html','/credits.html','/network.html','/gifts.html','/shares.html','/owner.html','/owner-access.html','/fulfillment.html'].includes(value) ? value : '/account.html';
+ return ['/', '/index.html', '/account.html','/designs.html','/orders.html','/credits.html','/network.html','/gifts.html','/shares.html','/owner.html','/owner-access.html','/finances.html','/fulfillment.html'].includes(value) ? value : '/account.html';
 }
 export function validatePassword(password,confirmation) {
  if(password.length<12) throw new Error('Use at least 12 characters for your password.');

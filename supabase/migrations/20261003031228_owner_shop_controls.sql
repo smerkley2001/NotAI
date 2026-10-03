@@ -1,0 +1,13 @@
+begin;
+create table public.shop_owners(auth_user_id uuid primary key references auth.users(id) on delete cascade,created_at timestamptz not null default now());
+alter table public.shop_owners enable row level security;
+revoke all on public.shop_owners from anon,authenticated;
+grant select on public.shop_owners to authenticated;
+grant all on public.shop_owners to service_role;
+create policy own_owner_membership on public.shop_owners for select to authenticated using(auth_user_id=(select auth.uid()));
+create table public.shop_settings(id boolean primary key default true check(id),ordering_open boolean not null default false,shipping_minor integer not null default 599 check(shipping_minor between 0 and 100000),fulfillment_note text not null default 'Orders are prepared manually after payment.' check(length(fulfillment_note)<=500),updated_at timestamptz not null default now());
+alter table public.shop_settings enable row level security;
+revoke all on public.shop_settings from anon,authenticated;
+grant all on public.shop_settings to service_role;
+insert into public.shop_settings(id) values(true);
+commit;

@@ -1,0 +1,8 @@
+import QRCode from 'qrcode';import {publicDb,authenticated,noStore,respondError,canonicalOrigin} from '../lib/server.js';
+export default async function handler(req,res){noStore(res);if(req.method!=='GET')return res.status(405).end();try{const token=req.query.token;const format=req.query.format||'svg';if(typeof token!=='string'||!/^[a-f0-9]{32}$/.test(token)||!['svg','png'].includes(format))return res.status(400).json({error:'Invalid QR request'});
+ const store=publicDb();const published=await store.rpc('read_shirt',{p_token:token});if(published.error)throw published.error;
+ if(!published.data){const user=await authenticated(req);// RLS requires a bearer-scoped client for private reads.
+ const bearer=req.headers.authorization.slice(7);const {createClient}=await import('@supabase/supabase-js');const {SUPABASE_URL,SUPABASE_KEY}=await import('../src/config.js');const scoped=createClient(process.env.SUPABASE_URL||SUPABASE_URL,process.env.SUPABASE_PUBLISHABLE_KEY||SUPABASE_KEY,{global:{headers:{Authorization:'Bearer '+bearer}},auth:{persistSession:false}});
+ const owned=await scoped.from('shirts').select('id').eq('qr_token',token).maybeSingle();if(owned.error||!owned.data)return res.status(404).json({error:'Shirt not found'});}
+ const url=canonicalOrigin+'/s/'+token;res.setHeader('Content-Disposition','attachment; filename="notai-qr-'+token+'.'+format+'"');res.setHeader('Content-Type',format==='svg'?'image/svg+xml':'image/png');const options={errorCorrectionLevel:'Q',margin:4,width:1024,color:{dark:'#000000',light:'#FFFFFF'}};const data=format==='svg'?await QRCode.toString(url,{...options,type:'svg'}):await QRCode.toBuffer(url,options);res.status(200).send(data);
+ }catch(e){respondError(res,e);}}

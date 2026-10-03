@@ -1,0 +1,24 @@
+import {spawn} from 'node:child_process';
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+const server=spawn('python3',['-m','http.server','4175','--bind','127.0.0.1','--directory','dist']);
+await new Promise(r=>setTimeout(r,400));
+const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/tmp/chromium',args:['--no-sandbox']});
+try{const context=await browser.newContext();const page=await context.newPage();const errors=[],writes=[];
+page.on('pageerror',e=>errors.push(e.message));await context.route('https://dompwdardnqvmoncawrk.supabase.co/**',r=>{if(r.request().method()!=='GET')writes.push(r.request().url());return r.fulfill({status:401,contentType:'application/json',body:'{"message":"not signed in"}'});});
+await page.goto('http://127.0.0.1:4175/try.html');await page.locator('#demo-name').fill('Demo Human');await page.getByRole('button',{name:'Save demo profile'}).click();assert.match(await page.locator('#status').innerText(),/saved/);
+await page.getByRole('link',{name:'Create a shirt design'}).click();await page.locator('#design-name').fill('Browser idea');await page.locator('#save-design').click();assert.match(await page.locator('#status').innerText(),/saved in this browser/);
+await page.reload();await page.waitForFunction(()=>document.getElementById('design-name').value==='Browser idea');assert.equal(await page.locator('#design-name').inputValue(),'Browser idea');await page.locator('#save-copy').click();
+await page.goto('http://127.0.0.1:4175/designs.html');await page.waitForURL('**/try.html?tab=designs');assert.equal(await page.locator('article').count(),2);
+await page.getByRole('button',{name:'Archive',exact:true}).first().click();assert.match(await page.locator('article').first().innerText(),/archived/);
+await page.goto('http://127.0.0.1:4175/try.html?tab=credits');assert.match(await page.locator('#demo-content').innerText(),/No spendable credit/);
+assert.deepEqual(writes,[]);assert.deepEqual(errors,[]);
+await page.getByRole('link',{name:'Create an account and keep my designs'}).click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('notai-demo')),null);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('notai-browser-drafts-v1')).designs.length),2);
+const user={id:'00000000-0000-4000-8000-000000000099',email:'demo@example.invalid',is_anonymous:false,user_metadata:{full_name:'Account Human'}};
+const jwt=Buffer.from(JSON.stringify({alg:'HS256'})).toString('base64url')+'.'+Buffer.from(JSON.stringify({sub:user.id,exp:Math.floor(Date.now()/1000)+3600,role:'authenticated'})).toString('base64url')+'.test';
+await page.evaluate(({user,jwt})=>localStorage.setItem('sb-dompwdardnqvmoncawrk-auth-token',JSON.stringify({access_token:jwt,refresh_token:'test',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})),{user,jwt});
+let imports=0;await context.unroute('https://dompwdardnqvmoncawrk.supabase.co/**');await context.route('https://dompwdardnqvmoncawrk.supabase.co/**',r=>{const path=new URL(r.request().url()).pathname;let body={};if(path.endsWith('/user'))body=user;else if(path.endsWith('/profiles'))body={id:'10000000-0000-4000-8000-000000000099',full_name:'Account Human',handle:null,network_visibility:'private'};else if(path.endsWith('/rpc/save_design')){imports++;body={design_id:crypto.randomUUID(),revision_number:1};}return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});});
+await page.goto('http://127.0.0.1:4175/account.html');await page.getByRole('button',{name:'Import browser drafts'}).click();await page.waitForFunction(()=>document.getElementById('status').textContent.includes('1 designs imported'));assert.equal(imports,1);await page.getByRole('button',{name:'Import browser drafts'}).click();await page.waitForFunction(()=>document.getElementById('status').textContent.includes('0 designs imported'));assert.equal(imports,1);assert.deepEqual(errors,[]);
+console.log('PASS: import latest unarchived drafts and repeat import deduplication');
+console.log('PASS: browser-only profile/design versions/copies/archive, demo route, sample credit labeling, registration preserves drafts; no database writes');
+}finally{await browser.close();server.kill();}

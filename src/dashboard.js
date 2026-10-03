@@ -1,3 +1,4 @@
+import {demoActive,demoEntry} from './guest.js';
 import {iconSvg} from './icons-svg.js';
 import {qrSvg,qrPng,shirtUrl,download} from './qr.js';
 import {client,member,requireWrites,notify,login,fail,writesEnabled} from './member.js';
@@ -50,5 +51,5 @@ async function network(){
 }
 document.getElementById('archive-toggle')?.addEventListener('change',e=>{archived=e.target.checked;offset=0;designs().catch(fail);});
 document.getElementById('load-more')?.addEventListener('click',async e=>{offset+=24;await act(e.target,()=>mode==='designs'?designs():mode==='network'?network():orders());});
-async function init(){const account=await member();if(!account){login(mode==='order'?'/orders.html':location.pathname);return;}if(!account.profile){notify('Finish your account profile first.','error');list.append(link('Complete my profile','/account.html'));return;}if(!writesEnabled)notify('Preview only. Design changes are disabled.');await ({designs,orders,order,credits,network}[mode])();}
+async function init(){demoEntry();if(demoActive()){location.replace('/try.html?tab='+mode);return;}const account=await member();if(!account){login(mode==='order'?'/orders.html':location.pathname);return;}if(!account.profile){notify('Finish your account profile first.','error');list.append(link('Complete my profile','/account.html'));return;}if(!writesEnabled)notify('Preview only. Design changes are disabled.');await ({designs,orders,order,credits,network}[mode])();}
 init().catch(fail);

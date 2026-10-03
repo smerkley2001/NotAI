@@ -1,7 +1,9 @@
+import {demoActive,readDrafts,saveDraft,demoEntry,demoBanner} from './guest.js';
 import {iconSvg} from './icons-svg.js';
 import {artwork} from './proof.js';
 import {client,member,requireWrites,notify,login,fail,writesEnabled} from './member.js';
 import {icons,fonts,validateDesign,validateName,uuidPattern} from './design-model.js';
+let draftId=null;
 let current=null,revision=0,dirty=false,loading=false,account=null;
 const name=document.getElementById('design-name');
 const save=document.getElementById('save-design');
@@ -21,6 +23,7 @@ async function load(id){
  history.hidden=false;copy.hidden=false;document.getElementById('proof-link').href='/proof.html?revision='+r.data[0].id;document.getElementById('proof-link').hidden=false;notify(`Saved version ${revision}.`);
 }
 async function persist(asCopy=false,draft=null){
+ if(demoActive()){const saved=saveDraft(asCopy?null:draftId,name.value,draft||payload());draftId=saved.id;dirty=false;window.history.replaceState(null,'','/index.html?draft='+saved.id);loadDraft(saved);notify('Design saved in this browser.');return;}
  requireWrites();const d=draft||payload();const n=validateName(name.value);
  account=await member();if(!account){sessionStorage.setItem('notai-unsaved-design',JSON.stringify({name:n,design:d}));dirty=false;login('/index.html');return;}
  if(!account.profile){notify('Finish your account profile before saving. Use My account above.',true);return;}
@@ -34,7 +37,10 @@ save.addEventListener('click',()=>persist().catch(fail));copy.addEventListener('
 restore.addEventListener('click',()=>{const selected=revisionSelect.selectedOptions[0];if(selected)persist(false,JSON.parse(selected.dataset.design)).then(()=>notify('Earlier design restored as a new version.')).catch(fail);});
 window.addEventListener('notai:design-changed',()=>{if(!loading){dirty=true;notify('You have unsaved changes.');}});name.addEventListener('input',()=>{dirty=true;});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+function loadDraft(d){name.value=d.name;apply(d.versions.at(-1));revisionSelect.replaceChildren();for(const [i,v] of [...d.versions.entries()].reverse()){const option=document.createElement('option');option.textContent='Version '+(i+1);option.dataset.design=JSON.stringify(v);revisionSelect.append(option);}history.hidden=false;copy.hidden=false;dirty=false;}
 async function init(){
+ demoEntry();if(demoActive()){demoBanner();save.textContent='Save in this browser';document.getElementById('share-design').hidden=true;const id=new URLSearchParams(location.search).get('draft');if(id){const d=readDrafts().designs.find(x=>x.id===id);if(!d)throw new Error('This browser draft is unavailable.');draftId=id;loadDraft(d);}return;}
+
  if(!writesEnabled)notify('This preview is for reviewing the pages. Changes are disabled.');
  account=await member();const id=new URLSearchParams(location.search).get('design');
  if(id){if(!uuidPattern.test(id))throw new Error('Invalid design link.');if(!account){login('/designs.html');return;}await load(id);}

@@ -75,7 +75,7 @@ input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:8px;
 <label>Shirt color</label><div class='shirts' id='shirts'></div>
 <label>Size</label><select><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option></select>
 <div class='ref'>✨ Every shirt gets a unique QR code. When someone scans yours and orders, <b>you earn $3 store credit.</b></div><div class='price'>$27.99</div><div class='intro'>Founding Human introductory price</div>
-<button class='buy' onclick="alert('Checkout is coming soon.')">Create My Shirt</button>
+<label for='design-name'>Design name</label><input id='design-name' value='My first design' maxlength='120'><button class='buy' id='save-design'>Save my design</button><button id='save-copy' hidden>Save as a new copy</button><div id='design-history' hidden><label for='revision-select'>Earlier versions</label><select id='revision-select'></select><button id='restore-revision'>Restore as a new version</button></div><p id='status' role='status' aria-live='polite'></p><p>Ordering will open after checkout is connected. <a href='/designs.html'>My saved designs</a></p>
 <button class='aiButton' id='aiPreviewBtn'>✨ Generate Realistic Preview</button>
 <div class='aiHelp'>Creates one AI lifestyle preview from your exact design. The live shirt preview remains the accurate print reference.</div>
 </div>
@@ -110,6 +110,7 @@ function render(){
   shirtPhoto.alt=`Customized ${shirt} T-shirt ${side} preview`;
   front.style.color=shirt==='white'?'#111':'#fff';
   back.style.color=shirt==='white'?'#111':'#fff';
+  window.dispatchEvent(new Event('notai:design-changed'));
 }
 
 cs.forEach((c,i)=>{
@@ -270,5 +271,6 @@ async function generateAIPreview(){
 
 document.getElementById('aiPreviewBtn').addEventListener('click',generateAIPreview);
 render();
-</script>
+window.notaiDesigner={read:()=>({line1:l1.value,line2:l2.value,font:font.value,accent,symbol,shirt}),apply:d=>{l1.value=d.line1;l2.value=d.line2;font.value=d.font;accent=d.accent;symbol=d.symbol;shirt=d.shirt;document.querySelectorAll('.swatch').forEach((b,i)=>b.classList.toggle('selected',cs[i]===accent));document.querySelectorAll('.icon').forEach((b,i)=>b.classList.toggle('selected',syms[i]===symbol));document.querySelectorAll('.shirt').forEach((b,i)=>b.classList.toggle('selected',sh[i][1]===shirt));document.getElementById('aiResult').style.display='none';render();}};
+</script><script type='module' src='/assets/designer.js'></script>
 </body></html>

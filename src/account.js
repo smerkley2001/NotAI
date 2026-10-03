@@ -1,3 +1,5 @@
+import {demoActive,demoEntry,readDrafts,storeDrafts,stopDemo} from './guest.js';
+import {validateDesign,validateName} from './design-model.js';
 import {createClient} from '@supabase/supabase-js';
 import {SUPABASE_URL,SUPABASE_KEY} from './config.js';
 import {validateProfile,validatePassword,safeNext} from './profile.js';
@@ -96,6 +98,9 @@ client.auth.onAuthStateChange((event,session)=>{
  // No awaited Supabase calls inside this callback (avoids auth lock deadlocks).
 });
 async function initialize(){
+ demoEntry();if(page==='account'&&demoActive()){location.replace('/try.html?tab=account');return;}
+ if(['signup','signin'].includes(page))stopDemo();
+
  if(!writesEnabled)message('This preview is for reviewing the pages. Account changes are disabled.');
  if(initialHash.get('error')){message('This email link is invalid or has expired. Request a new link.',true);history.replaceState(null,'',location.pathname);return;}
  const {data}=await client.auth.getSession();
@@ -103,6 +108,7 @@ async function initialize(){
  if(page==='account'){
   if(!user){routeLogin();return;}
   await loadProfile();
+  importPanel();
  }
  if(page==='reset'){
   recovery=recovery||Boolean(recoveryLink&&data.session&&user);
@@ -113,3 +119,5 @@ async function initialize(){
  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
 }
 initialize().catch(error=>message(errorText(error),true));
+
+function importPanel(){const drafts=readDrafts();if(!drafts.designs.length&&!drafts.profile.full_name)return;const section=document.createElement('section');section.className='card';const title=document.createElement('h2');title.textContent='Keep your browser drafts';const p=document.createElement('p');p.textContent='Import your latest unarchived designs into this account. Browser drafts stay here until you clear them. Sample orders, credits and network data are never imported.';const label=document.createElement('label');const check=document.createElement('input');check.type='checkbox';label.append(check,document.createTextNode(' Also apply my browser profile preferences (replaces current preferences)'));const b=document.createElement('button');b.textContent='Import browser drafts';section.append(title,p,label,b);document.getElementById('account-content').prepend(section);b.onclick=async()=>{b.disabled=true;try{if(!writesEnabled)throw new Error('Account changes are disabled in this preview.');const data=readDrafts();if(check.checked&&data.profile.full_name){const fields=validateProfile(data.profile);const result=profile?await client.from('profiles').update(fields).eq('id',profile.id).eq('auth_user_id',user.id):await client.from('profiles').insert({...fields,auth_user_id:user.id});if(result.error)throw result.error;await loadProfile();}if(!profile)throw new Error('Save your account profile first, then import your drafts.');data.imports[user.id] ||= {};storeDrafts(data);let count=0;for(const d of data.designs.filter(x=>!x.archived)){const fingerprint=JSON.stringify({name:d.name,design:validateDesign(d.versions.at(-1))});if(data.imports[user.id][d.id]===fingerprint)continue;const r=await client.rpc('save_design',{p_design_id:null,p_expected_revision:0,p_name:validateName(d.name),p_design:validateDesign(d.versions.at(-1))});if(r.error)throw r.error;data.imports[user.id][d.id]=fingerprint;storeDrafts(data);count++;}message(count+' designs imported. Find them in My designs.');}catch(e){message(errorText(e),true);}finally{b.disabled=false;}};}

@@ -4,3 +4,7 @@
 .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin:24px 0}.card-actions{display:flex;gap:8px;flex-wrap:wrap}.design-preview{position:relative;max-width:300px;margin:auto}.design-preview img{width:100%;display:block}.mini-art{position:absolute;top:27%;left:27%;width:46%;text-align:center;font-size:10px;line-height:1.5}.mini-art strong{display:block;font-size:15px}.mini-art span{font-size:20px}.nav{flex-wrap:wrap}.empty{grid-column:1/-1}
 
 .mini-art{top:48.5%;left:50%;transform:translate(-50%,-50%);width:44%}.mini-art strong{font-size:18px;line-height:1.05;margin-bottom:8px}.mini-art span{display:block;margin-top:5px}
+
+.proof-art{width:min(100%,360px);height:auto;border-radius:16px}.shirt-story{white-space:pre-wrap}textarea{font:inherit;width:100%;min-height:120px;padding:12px;border:1px solid #bbc6c8;border-radius:8px}.qr-image{width:220px;max-width:100%;background:white}.network-list{display:flex;flex-wrap:wrap;gap:12px}.network-node{padding:16px;border:1px solid #b9cfd0;border-radius:18px;background:#edf7f5}button:focus-visible,a:focus-visible{outline:3px solid #087e8b;outline-offset:3px}
+
+.qr-image{display:block;margin:16px auto}.card>.secondary{display:inline-block;margin:6px 4px 6px 0}.mini-art span svg{width:24px;height:24px}@media(max-width:600px){header{flex-direction:column;align-items:flex-start;gap:16px}.brand{white-space:nowrap}.nav{width:100%}}

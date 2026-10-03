@@ -17,3 +17,5 @@ test('checks password length and confirmation',()=>{
  assert.throws(()=>validatePassword('long password','different password'));
  assert.equal(validatePassword('long password','long password'),'long password');
 });
+
+test('allows a gift return link with a fixed-format bearer token',()=>{assert.equal(safeNext('/gift/'+'a'.repeat(32)),'/gift/'+'a'.repeat(32));assert.equal(safeNext('/gift/../evil'),'/account.html');});

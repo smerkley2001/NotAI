@@ -1,3 +1,5 @@
+import {iconSvg} from './icons-svg.js';
+import {artwork} from './proof.js';
 import {client,member,requireWrites,notify,login,fail,writesEnabled} from './member.js';
 import {icons,fonts,validateDesign,validateName,uuidPattern} from './design-model.js';
 let current=null,revision=0,dirty=false,loading=false,account=null;
@@ -16,7 +18,7 @@ async function load(id){
  if(!r.data.length)throw new Error('No saved revision found.');
  current=id;revision=r.data[0].revision_number;name.value=d.data.name;apply(r.data[0]);dirty=false;
  revisionSelect.replaceChildren();for(const rev of r.data){const opt=document.createElement('option');opt.value=rev.id;opt.textContent=`Version ${rev.revision_number} · ${new Date(rev.created_at).toLocaleString()}`;opt.dataset.design=JSON.stringify(validateDesign(rev));revisionSelect.append(opt);}
- history.hidden=false;copy.hidden=false;notify(`Saved version ${revision}.`);
+ history.hidden=false;copy.hidden=false;document.getElementById('proof-link').href='/proof.html?revision='+r.data[0].id;document.getElementById('proof-link').hidden=false;notify(`Saved version ${revision}.`);
 }
 async function persist(asCopy=false,draft=null){
  requireWrites();const d=draft||payload();const n=validateName(name.value);
@@ -39,3 +41,13 @@ async function init(){
  else {const saved=sessionStorage.getItem('notai-unsaved-design');if(saved){try{const d=JSON.parse(saved);name.value=validateName(d.name);apply(validateDesign(d.design));dirty=true;notify('Your unsaved idea is back. Save it when you’re ready.');}catch{sessionStorage.removeItem('notai-unsaved-design');}}}
 }
 init().catch(fail);
+
+document.getElementById('share-design').addEventListener('click',async()=>{try{requireWrites();if(dirty||!current)throw new Error('Save your current design before sharing.');const r=await client.rpc('share_design',{p_revision:revisionSelect.options[0].value,p_revoke:null});if(r.error)throw r.error;const out=document.getElementById('share-url');out.hidden=false;out.value='https://notaijusti.com/d/'+r.data;notify('Link created. Anyone with this link can view this saved version. Manage or revoke links in My shares.');}catch(e){fail(e);}});
+document.getElementById('starter').addEventListener('change',e=>{if(!e.target.value)return;const ideas={soccer:['modest, but handsome','and a great soccer player','soccer'],family:['proud of my people','and always cheering them on','heart'],creative:['made of stories','and a little imagination','art'],quiet:['quietly curious','and still figuring it out','books']};const [line1,line2,icon_key]=ideas[e.target.value];const d=payload();apply({...d,line1,line2,icon_key});dirty=true;notify('A starting point. Change the words until they sound like you.');});
+document.getElementById('suggest-words').addEventListener('click',async e=>{const button=e.target;button.disabled=true;try{requireWrites();const session=await client.auth.getSession();if(!session.data.session)throw new Error('Sign in to use optional AI wording help.');const response=await fetch('/api/suggest',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.data.session.access_token},body:JSON.stringify({idea:document.getElementById('word-idea').value})});const data=await response.json();if(!response.ok)throw new Error(data.error);const out=document.getElementById('word-suggestions');out.replaceChildren();for(const suggestion of data.suggestions){const b=document.createElement('button');b.type='button';b.textContent=suggestion.line1+' / '+suggestion.line2;b.onclick=()=>{apply({...payload(),line1:suggestion.line1,line2:suggestion.line2});dirty=true;notify('AI suggestion applied. Make it your own before saving.');};out.append(b);}}catch(e){fail(e);}finally{button.disabled=false;}});
+
+function refreshProof(){document.querySelectorAll('#icons .icon').forEach((button,i)=>{const key=Object.keys(icons)[i];button.innerHTML=iconSvg(key,payload().accent_color);button.setAttribute('aria-label',key+' icon');});const img=document.getElementById('canonical-art');img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(artwork(payload()));img.hidden=document.getElementById('front').style.display==='none';}
+window.addEventListener('notai:design-changed',refreshProof);
+window.notaiDesigner.artworkPng=async()=>{const image=new Image();image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(artwork(payload()));await image.decode();const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=1200;canvas.getContext('2d').drawImage(image,0,0);return canvas.toDataURL('image/png');};refreshProof();
+
+const giftReturn=sessionStorage.getItem('notai-gift-return');if(giftReturn&&/^[a-f0-9]{32}$/.test(giftReturn)){const a=document.createElement('a');a.href='/gift/'+giftReturn;a.textContent='Return to my gift invitation →';document.getElementById('save-design').after(a);}

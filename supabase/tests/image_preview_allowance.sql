@@ -1,0 +1,13 @@
+begin;
+insert into auth.users(id,email,is_anonymous) values('00000000-0000-4000-8000-000000000091','image-a@example.invalid',false),('00000000-0000-4000-8000-000000000092','image-b@example.invalid',false);
+insert into public.profiles(id,auth_user_id,full_name) values('10000000-0000-4000-8000-000000000091','00000000-0000-4000-8000-000000000091','Image A'),('10000000-0000-4000-8000-000000000092','00000000-0000-4000-8000-000000000092','Image B');
+select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000091","role":"authenticated","is_anonymous":false}',true);set local role authenticated;
+select public.reserve_image('20000000-0000-4000-8000-000000000091');select public.reserve_image('20000000-0000-4000-8000-000000000092');select public.reserve_image('20000000-0000-4000-8000-000000000093');
+do $$begin begin perform public.reserve_image('20000000-0000-4000-8000-000000000094');raise exception 'Quota failed';exception when others then if sqlerrm<>'Image allowance reached' then raise;end if;end;end$$;
+select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000092","role":"authenticated","is_anonymous":false}',true);select public.finish_image('20000000-0000-4000-8000-000000000091',true);
+reset role;do $$begin if (select status from notai_private.ai_requests where id='20000000-0000-4000-8000-000000000091')<>'reserved' then raise exception 'Cross-owner update';end if;end$$;
+select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000091","role":"authenticated","is_anonymous":false}',true);set local role authenticated;select public.finish_image('20000000-0000-4000-8000-000000000091',true);select public.finish_image('20000000-0000-4000-8000-000000000092',false);
+reset role;do $$begin if (select count(*) from notai_private.ai_requests where user_id='10000000-0000-4000-8000-000000000091' and model like 'image:%')<>3 then raise exception 'Completion changed quota';end if;end$$;
+set local role anon;do $$begin begin perform public.reserve_image(gen_random_uuid());raise exception 'Anonymous allowed';exception when insufficient_privilege then null;end;end$$;reset role;
+select 'PASS: three attempts including failures, completion owner isolation, anonymous denied' as result;
+rollback;

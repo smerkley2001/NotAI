@@ -15,3 +15,6 @@ if(host&&guides[pageKey]&&!demoPage){const section=document.createElement('secti
 for(const a of document.querySelectorAll('main a,.wrap a')){if(a.id==='proof-link'||a.querySelector('img'))continue;a.classList.add('page-link');}
 
 const actions=document.querySelector('.demo-actions');const demoContent=document.getElementById('demo-content');if(actions&&demoContent)demoContent.after(actions);
+
+// Discover owner controls from protected membership, never from editable profile metadata.
+if(!demo)import('./member.js').then(async({client})=>{const {data}=await client.auth.getSession();if(!data.session||data.session.user.is_anonymous)return;const r=await client.from('shop_owners').select('auth_user_id').eq('auth_user_id',data.session.user.id).maybeSingle();if(!r.error&&r.data){const group=document.querySelector('.nav-secondary');if(group)group.append(link('Owner dashboard','/owner.html','owner'));}}).catch(()=>{});

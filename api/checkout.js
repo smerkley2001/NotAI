@@ -1,8 +1,9 @@
+import {settings,readiness,ready} from '../lib/shop.js';
 import {db,gate,stripe,authenticated,respondError,noStore,validUuid,checkoutOrigin} from '../lib/server.js';
 export default async function handler(req,res){noStore(res);if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).end();}try{
  gate();const returnOrigin=checkoutOrigin();const user=await authenticated(req);const b=typeof req.body==='string'?JSON.parse(req.body):req.body;
  if(!b||!validUuid(b.revision_id)||!validUuid(b.variant_id)||!validUuid(b.request_key)||!Number.isInteger(b.quantity)||b.quantity<1||b.quantity>10||b.proof_confirmed!==true)throw Object.assign(new Error('Review your design, size, and quantity first.'),{status:400});
- const shipping=Number(process.env.NOTAI_SHIPPING_MINOR);if(!Number.isSafeInteger(shipping)||shipping<0||shipping>100000)throw Object.assign(new Error('Shipping setup is not complete.'),{status:503});
+ const shop=await settings();if(!shop.ordering_open||!ready(readiness()))throw Object.assign(new Error('Ordering is not open yet.'),{status:503});const shipping=shop.shipping_minor;if(!Number.isSafeInteger(shipping)||shipping<0||shipping>100000)throw Object.assign(new Error('Shipping setup is not complete.'),{status:503});
  const store=db();const order=await store.rpc('prepare_order',{p_auth_user:user.id,p_revision:b.revision_id,p_variant:b.variant_id,p_quantity:b.quantity,p_shipping_minor:shipping,p_referral:typeof b.referral==='string'&&/^[a-f0-9]{32}$/.test(b.referral)?b.referral:null,p_key:b.request_key,p_gift:typeof b.gift==='string'&&/^[a-f0-9]{32}$/.test(b.gift)?b.gift:null,p_use_credit:b.use_credit===true});if(order.error)throw Object.assign(new Error('That design or product is unavailable. Please review your selection.'),{status:400});
  const o=order.data;if(o.payment_status!=='pending')throw Object.assign(new Error('This checkout has already finished. Check your orders.'),{status:409});
  const cancel=new URLSearchParams({revision:b.revision_id,variant:b.variant_id,quantity:String(b.quantity),credit:b.use_credit===true?'true':'false'});if(b.gift)cancel.set('gift',b.gift);
